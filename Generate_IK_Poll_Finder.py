@@ -1,6 +1,8 @@
 import bpy
 from . import Utility_Function
 
+ENUM_Extrude_Method = [("Y","Y Axis","Y Axis"), ("BEND","Bend","Bend")]
+
 class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
     """Extract and Constraint"""
     bl_idname = "retarget_helper.generate_ik_poll_finder"
@@ -9,10 +11,35 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
 
     Distance: bpy.props.FloatProperty(default=10)
 
+    Y_Distance: bpy.props.FloatProperty(default=1)
+
     Tail_Offset: bpy.props.FloatProperty(name="Tail", default=0.2)
+
+    Extrude_Method: bpy.props.EnumProperty(name="Extrude Method", items=ENUM_Extrude_Method)
 
     Poll_Name: bpy.props.StringProperty()
     Poll_Helper_Name: bpy.props.StringProperty()
+
+    Flip_Direction: bpy.props.BoolProperty(default=False)
+
+
+    def draw(self, context):
+        layout = self.layout
+
+        row = layout.row()
+        row.prop(self, "Extrude_Method", expand=True)
+
+        if self.Extrude_Method == "Y":
+            layout.prop(self, "Y_Distance", text="Distance (Y)")
+            layout.prop(self, "Flip_Direction", text="Flip Direction")
+
+        if self.Extrude_Method == "BEND":
+            layout.prop(self, "Distance", text="Distance")
+
+
+        layout.prop(self, "Tail_Offset")
+        layout.prop(self, "Poll_Name", text="Poll Bone Name")
+        layout.prop(self, "Poll_Helper_Name", text="Helper Bone Name")
 
     def invoke(self, context, event):
 
@@ -44,12 +71,21 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
 
 
         if Upper and Lower:
-
-            Poll_Position = Utility_Function.Calculate_Poll_Position(Upper, Lower, self.Distance)
+            if self.Extrude_Method == "BEND":
+                Poll_Position = Utility_Function.Calculate_Poll_Position(Upper, Lower, self.Distance)
+            if self.Extrude_Method == "Y":
+                Poll_Position = Lower.head
 
             poll_bone = bones.new(self.Poll_Name)
             poll_bone.head = Poll_Position
-            poll_bone.tail = Poll_Position
+
+            if self.Extrude_Method == "Y":
+                if self.Flip_Direction:
+                    poll_bone.head.y -= self.Y_Distance
+                else:
+                    poll_bone.head.y += self.Y_Distance
+
+            poll_bone.tail = poll_bone.head
             poll_bone.tail.z += self.Tail_Offset
 
 
