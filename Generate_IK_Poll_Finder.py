@@ -61,6 +61,8 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
 
             helper_bone.parent = Upper
 
+            helper_bone.roll = Upper.roll
+
             poll_bone_name = poll_bone.name
             helper_bone_name = helper_bone.name
             Lower_bone_name = Lower.name
