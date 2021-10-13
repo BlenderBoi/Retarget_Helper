@@ -1,5 +1,5 @@
 import bpy
-from Retarget_Helper import Utility_Function
+from . import Utility_Function
 
 class RETARGET_HELPER_PT_Side_Panel(bpy.types.Panel):
     """Simple Retarget Helper Tool"""
@@ -12,6 +12,7 @@ class RETARGET_HELPER_PT_Side_Panel(bpy.types.Panel):
         layout = self.layout
         layout.operator("retarget_helper.extract_and_constraint", text="Extract and Constraint")
         layout.operator("retarget_helper.generate_ik_poll_finder", text="Generate IK Poll Finder")
+        layout.operator("retarget_helper.actorcore_cleanup", text="Actorcore Cleanup")
 
 
 

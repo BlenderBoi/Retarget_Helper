@@ -14,8 +14,8 @@ from . import Preferences
 from . import Retarget_Helper_Panel
 from . import Extract_And_Constraint
 from . import Generate_IK_Poll_Finder
-
-modules = [Generate_IK_Poll_Finder, Retarget_Helper_Panel, Extract_And_Constraint, Preferences]
+from . import ActorCore_Cleanup
+modules = [ActorCore_Cleanup, Generate_IK_Poll_Finder, Retarget_Helper_Panel, Extract_And_Constraint, Preferences]
 
 def register():
     for module in modules:
