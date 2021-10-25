@@ -1,5 +1,40 @@
 import bpy
 import mathutils
+import numpy
+
+def midpoint(coordinates, mode):
+
+    if len(coordinates) > 0:
+
+        if mode == "BOUNDING_BOX":
+
+            x= []
+            y= []
+            z= []
+
+            for coordinate in coordinates:
+                x.append(coordinate[0])
+                y.append(coordinate[1])
+                z.append(coordinate[2])
+
+            range_x = (max(x), min(x))
+            range_y = (max(y), min(y))
+            range_z = (max(z), min(z))
+
+            bounding_box_coordinate = []
+
+            for a in range_x:
+                for b in range_y:
+                    for c in range_z:
+                        bounding_box_coordinate.append((a, b, c))
+
+            return mathutils.Vector(numpy.array(bounding_box_coordinate).mean(axis=0))
+
+        if mode == "CENTER":
+            return mathutils.Vector(numpy.array(coordinates).mean(axis=0))
+    else:
+        return None
+
 
 def altitude(A, B, V):
 

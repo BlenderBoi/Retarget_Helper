@@ -1,7 +1,8 @@
 import bpy
 from . import Utility_Function
+import mathutils
 
-ENUM_Extrude_Method = [("Y","Y Axis","Y Axis"), ("BEND","Bend","Bend")]
+ENUM_IK_Finder_Method = [("ADVANCED","Advanced","Advanced"),("SIMPLE","Simple","Simple")]
 
 class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
     """Extract and Constraint"""
@@ -9,47 +10,39 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
     bl_label = "Generate IK Poll Finder"
     bl_options = {'REGISTER', 'UNDO'}
 
-    Distance: bpy.props.FloatProperty(default=10)
 
-    Y_Distance: bpy.props.FloatProperty(default=1)
+    IK_Finder_Method: bpy.props.EnumProperty(name="Finder Method", items=ENUM_IK_Finder_Method)
+    Distance: bpy.props.FloatProperty(name="Distance", default=0.5)
+    Pole_Bone_Name: bpy.props.StringProperty()
 
-    Tail_Offset: bpy.props.FloatProperty(name="Tail", default=0.2)
+    Pole_Copy_Rotation: bpy.props.BoolProperty(default=False)
 
-    Extrude_Method: bpy.props.EnumProperty(name="Extrude Method", items=ENUM_Extrude_Method)
-
-    Poll_Name: bpy.props.StringProperty()
-    Poll_Helper_Name: bpy.props.StringProperty()
-
-    Flip_Direction: bpy.props.BoolProperty(default=False)
-
+    MCH_Bone_Layer: bpy.props.IntProperty(min=0, max=31, default=30)
+    Pole_Bone_Layer: bpy.props.IntProperty(min=0, max=31, default=0)
 
     def draw(self, context):
         layout = self.layout
-
         row = layout.row()
-        row.prop(self, "Extrude_Method", expand=True)
+        row.prop(self, "IK_Finder_Method", expand=True)
+        layout.prop(self, "Distance")
+        layout.prop(self, "Pole_Bone_Name", text="Pole Name")
 
-        if self.Extrude_Method == "Y":
-            layout.prop(self, "Y_Distance", text="Distance (Y)")
-            layout.prop(self, "Flip_Direction", text="Flip Direction")
+        if self.IK_Finder_Method == "ADVANCED":
+            layout.prop(self, "Pole_Copy_Rotation", text="Copy Rotation")
 
-        if self.Extrude_Method == "BEND":
-            layout.prop(self, "Distance", text="Distance")
+        row = layout.row(align=True)
+        row.prop(self, "MCH_Bone_Layer", text="MCH Bone Layer")
+        row.prop(self, "Pole_Bone_Layer", text="Pole Bone Layer")
 
-
-        layout.prop(self, "Tail_Offset")
-        layout.prop(self, "Poll_Name", text="Poll Bone Name")
-        layout.prop(self, "Poll_Helper_Name", text="Helper Bone Name")
 
     def invoke(self, context, event):
 
         active_bone = context.active_bone
+        Lower = active_bone
+        self.Pole_Bone_Name = "Pole_" + Lower.name
 
-        self.Poll_Name = "POLL_" + active_bone.name
-        self.Poll_Helper_Name = "POLL_Helper" + active_bone.name
 
         return context.window_manager.invoke_props_dialog(self)
-
 
     @classmethod
     def poll(cls, context):
@@ -60,9 +53,9 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
 
         object = context.object
         mode = context.mode
-        bones = object.data.edit_bones
 
         bpy.ops.object.mode_set(mode = 'EDIT')
+        bones = object.data.edit_bones
 
         active_bone = context.active_bone
 
@@ -71,49 +64,192 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
 
 
         if Upper and Lower:
-            if self.Extrude_Method == "BEND":
-                Poll_Position = Utility_Function.Calculate_Poll_Position(Upper, Lower, self.Distance)
-            if self.Extrude_Method == "Y":
-                Poll_Position = Lower.head
+            if self.IK_Finder_Method == "ADVANCED":
+                #Turn off Deform for MCH Bone
+                Upper_Angle_Finder_Name = "MCH" + Upper.name + "Angle_Finder"
+                Lower_Angle_Finder_Name = "MCH" + Lower.name + "Angle_Finder"
 
-            poll_bone = bones.new(self.Poll_Name)
-            poll_bone.head = Poll_Position
+                Upper_Angle_Finder = bones.new(Upper_Angle_Finder_Name)
+                Lower_Angle_Finder = bones.new(Lower_Angle_Finder_Name)
 
-            if self.Extrude_Method == "Y":
-                if self.Flip_Direction:
-                    poll_bone.head.y -= self.Y_Distance
-                else:
-                    poll_bone.head.y += self.Y_Distance
+                Upper_Angle_Finder.head = Upper.tail
+                Upper_Angle_Finder.tail = Upper.head
 
-            poll_bone.tail = poll_bone.head
-            poll_bone.tail.z += self.Tail_Offset
+                Lower_Angle_Finder.head = Lower.head
+                Lower_Angle_Finder.tail = Lower.tail
+
+                Upper_Angle_Finder.length = 0.2
+                Lower_Angle_Finder.length = 0.2
+
+                Upper_Angle_Finder.roll = Upper.roll
+                Lower_Angle_Finder.roll = Lower.roll
+
+                Upper_Angle_Finder.parent = Lower
+                Lower_Angle_Finder.parent = Lower
+
+                Angle_Pointer_Name = "MCH" + Lower.name + "Angle_Pointer"
+                Angle_Pointer = bones.new(Angle_Pointer_Name)
+
+                Angle_Pointer.head = Utility_Function.midpoint([Upper_Angle_Finder.tail, Lower_Angle_Finder.tail], "CENTER")
+                Angle_Pointer.tail = Lower.head
+
+                Angle_Pointer.parent = Lower
+
+                Pole_Finder_Name = "MCH" + Lower.name + "Pole_Finder"
+                Pole_Finder = bones.new(Pole_Finder_Name)
+                Pole_Finder.head = Lower.head
+                Pole_Finder.align_orientation(Angle_Pointer)
+                Pole_Finder.length = self.Distance
+
+                Pole_Finder.parent = Lower
 
 
-            helper_bone = bones.new(self.Poll_Helper_Name)
-            helper_bone.head = Lower.head
-            helper_bone.tail = poll_bone.head
+                Pole_Bone = bones.new(self.Pole_Bone_Name)
+                Pole_Bone.head = Pole_Finder.tail
+                Pole_Bone.tail = Pole_Bone.head
+                Pole_Bone.tail.z += 0.5
 
-            poll_bone.parent = helper_bone
+                if self.Pole_Copy_Rotation:
+                    Pole_Bone.align_orientation(Angle_Pointer)
 
-            helper_bone.parent = Upper
+                Upper = Upper.name
+                Lower = Lower.name
+                Upper_Angle_Finder = Upper_Angle_Finder.name
+                Lower_Angle_Finder = Lower_Angle_Finder.name
+                Angle_Pointer = Angle_Pointer.name
+                Pole_Finder = Pole_Finder.name
+                Pole_Bone = Pole_Bone.name
 
-            helper_bone.roll = Upper.roll
+                bpy.ops.object.mode_set(mode = 'POSE')
 
-            poll_bone_name = poll_bone.name
-            helper_bone_name = helper_bone.name
-            Lower_bone_name = Lower.name
+                bones = object.pose.bones
 
-            bpy.ops.object.mode_set(mode = 'POSE')
+                Upper = bones.get(Upper)
+                Lower = bones.get(Lower)
+                Upper_Angle_Finder = bones.get(Upper_Angle_Finder)
+                Lower_Angle_Finder = bones.get(Lower_Angle_Finder)
+                Angle_Pointer = bones.get(Angle_Pointer)
+                Pole_Finder = bones.get(Pole_Finder)
+                Pole_Bone = bones.get(Pole_Bone)
 
-            helper_bone = object.pose.bones.get(helper_bone_name)
+                Constraint = Upper_Angle_Finder.constraints.new("DAMPED_TRACK")
+                Constraint.target = object
+                Constraint.subtarget = Upper.name
 
-            constraint = helper_bone.constraints.new("COPY_ROTATION")
-            constraint.target = object
-            constraint.subtarget = Lower_bone_name
-            constraint.target_space = "LOCAL"
-            constraint.owner_space = "LOCAL"
-            constraint.influence = 0.5
-            constraint.use_y = False
+                Constraint = Lower_Angle_Finder.constraints.new("DAMPED_TRACK")
+                Constraint.target = object
+                Constraint.subtarget = Lower.name
+                Constraint.head_tail = 1
+
+                Constraint = Angle_Pointer.constraints.new("COPY_LOCATION")
+                Constraint.target = object
+                Constraint.subtarget = Upper_Angle_Finder.name
+                Constraint.head_tail = 1
+
+                Constraint = Angle_Pointer.constraints.new("COPY_LOCATION")
+                Constraint.target = object
+                Constraint.subtarget = Lower_Angle_Finder.name
+                Constraint.head_tail = 1
+                Constraint.influence = 0.5
+
+                Constraint = Angle_Pointer.constraints.new("DAMPED_TRACK")
+                Constraint.target = object
+                Constraint.subtarget = Lower.name
+
+                Constraint = Pole_Finder.constraints.new("COPY_ROTATION")
+                Constraint.target = object
+                Constraint.subtarget = Angle_Pointer.name
+
+                Constraint = Pole_Bone.constraints.new("COPY_LOCATION")
+                Constraint.target = object
+                Constraint.subtarget = Pole_Finder.name
+                Constraint.head_tail = 1
+
+                if self.Pole_Copy_Rotation:
+                    Constraint = Pole_Bone.constraints.new("COPY_ROTATION")
+                    Constraint.target = object
+                    Constraint.subtarget = Pole_Finder.name
+
+                layers = [False for x in range(32)]
+                layers[self.Pole_Bone_Layer] = True
+                Pole_Bone.bone.layers = layers
+
+                MCH_Bones = [Pole_Finder, Angle_Pointer, Lower_Angle_Finder, Upper_Angle_Finder]
+
+                for bone in MCH_Bones:
+
+                    layers = [False for x in range(32)]
+                    layers[self.MCH_Bone_Layer] = True
+                    bone.bone.layers = layers
+
+            if self.IK_Finder_Method == "SIMPLE":
+
+                Upper_Angle_Finder_Name = "MCH" + Upper.name + "Angle_Finder"
+                Lower_Angle_Finder_Name = "MCH" + Lower.name + "Angle_Finder"
+
+                Upper_Angle_Finder = bones.new(Upper_Angle_Finder_Name)
+                Lower_Angle_Finder = bones.new(Lower_Angle_Finder_Name)
+
+                Upper_Angle_Finder.head = Upper.tail
+                Upper_Angle_Finder.tail = Upper.head
+                Upper_Angle_Finder.roll = Upper.roll
+
+                Lower_Angle_Finder.head = Lower.head
+                Lower_Angle_Finder.tail = Lower.tail
+                Lower_Angle_Finder.roll = Lower.roll
+
+                Lower_Angle_Finder.length = -(self.Distance)
+                Upper_Angle_Finder.length = -(self.Distance)
+
+                Lower_Angle_Finder.parent = Lower
+                Upper_Angle_Finder.parent = Upper
+
+                Pole_Bone_Name = self.Pole_Bone_Name
+                Pole_Bone = bones.new(Pole_Bone_Name)
+
+                Pole_Bone.head = Utility_Function.midpoint([Upper_Angle_Finder.tail, Lower_Angle_Finder.tail], "CENTER")
+                Pole_Bone.tail = Pole_Bone.head
+                Pole_Bone.tail.z += 0.5
+
+                Upper = Upper.name
+                Lower = Lower.name
+                Upper_Angle_Finder = Upper_Angle_Finder.name
+                Lower_Angle_Finder = Lower_Angle_Finder.name
+                Pole_Bone = Pole_Bone.name
+
+                bpy.ops.object.mode_set(mode = 'POSE')
+
+                bones = object.pose.bones
+
+                Upper = bones.get(Upper)
+                Lower = bones.get(Lower)
+                Upper_Angle_Finder = bones.get(Upper_Angle_Finder)
+                Lower_Angle_Finder = bones.get(Lower_Angle_Finder)
+                Pole_Bone = bones.get(Pole_Bone)
+
+                Constraint = Pole_Bone.constraints.new("COPY_LOCATION")
+                Constraint.target = object
+                Constraint.subtarget = Lower_Angle_Finder.name
+                Constraint.head_tail = 1
+
+
+                Constraint = Pole_Bone.constraints.new("COPY_LOCATION")
+                Constraint.target = object
+                Constraint.subtarget = Upper_Angle_Finder.name
+                Constraint.head_tail = 1
+                Constraint.influence = 0.5
+
+                layers = [False for x in range(32)]
+                layers[self.Pole_Bone_Layer] = True
+                Pole_Bone.bone.layers = layers
+
+                MCH_Bones = [Upper_Angle_Finder, Lower_Angle_Finder]
+
+                for bone in MCH_Bones:
+
+                    layers = [False for x in range(32)]
+                    layers[self.MCH_Bone_Layer] = True
+                    bone.bone.layers = layers
 
         if mode == "POSE":
             bpy.ops.object.mode_set(mode = 'POSE')
