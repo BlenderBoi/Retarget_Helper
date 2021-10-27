@@ -4,6 +4,12 @@ import mathutils
 
 ENUM_IK_Finder_Method = [("ADVANCED","Advanced","Advanced"),("SIMPLE","Simple","Simple")]
 
+def update_distance_no_zero(self, context):
+    if self.Distance == 0:
+        self.Distance = 0.1
+def update_pole_size_no_zero(self, context):
+    if self.Pole_Size == 0:
+        self.Pole_Size = 0.1
 class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
     """Extract and Constraint"""
     bl_idname = "retarget_helper.generate_ik_poll_finder"
@@ -12,7 +18,7 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
 
 
     IK_Finder_Method: bpy.props.EnumProperty(name="Finder Method", items=ENUM_IK_Finder_Method)
-    Distance: bpy.props.FloatProperty(name="Distance", default=0.5)
+    Distance: bpy.props.FloatProperty(name="Distance", default=0.5, update=update_distance_no_zero)
     Pole_Bone_Name: bpy.props.StringProperty()
 
     Pole_Copy_Rotation: bpy.props.BoolProperty(default=False)
@@ -20,7 +26,11 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
     MCH_Bone_Layer: bpy.props.IntProperty(min=0, max=31, default=30)
     Pole_Bone_Layer: bpy.props.IntProperty(min=0, max=31, default=0)
 
-    Pole_Size: bpy.props.FloatProperty(min=0, default=0.5)
+    Pole_Size: bpy.props.FloatProperty(default=0.5, update=update_pole_size_no_zero)
+
+    Show_Extras: bpy.props.BoolProperty()
+    Advanced_MCH_Size: bpy.props.FloatProperty(min=0.1, default=0.2)
+    Advanced_MCH_Angle_Pointer_Length: bpy.props.FloatProperty(min=0.1, default=0.2)
 
     def draw(self, context):
         layout = self.layout
@@ -37,6 +47,12 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
         row = layout.row(align=True)
         row.prop(self, "MCH_Bone_Layer", text="MCH Bone Layer")
         row.prop(self, "Pole_Bone_Layer", text="Pole Bone Layer")
+
+        layout.prop(self, "Show_Extras", text="MCH Options")
+        if self.Show_Extras:
+            if self.IK_Finder_Method == "ADVANCED":
+                layout.prop(self, "Advanced_MCH_Size", text="MCH Size (Advanced)")
+                layout.prop(self, "Advanced_MCH_Angle_Pointer_Length", text="Angle Pointer Size (Advanced)")
 
 
     def invoke(self, context, event):
@@ -85,8 +101,8 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
                 Lower_Angle_Finder.head = Lower.head
                 Lower_Angle_Finder.tail = Lower.tail
 
-                Upper_Angle_Finder.length = 0.2
-                Lower_Angle_Finder.length = 0.2
+                Upper_Angle_Finder.length = self.Advanced_MCH_Size
+                Lower_Angle_Finder.length = self.Advanced_MCH_Size
 
                 Upper_Angle_Finder.roll = Upper.roll
                 Lower_Angle_Finder.roll = Lower.roll
@@ -101,7 +117,7 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
                 Angle_Pointer.tail = Lower.head
 
                 if Angle_Pointer.head == Angle_Pointer.tail:
-                    Angle_Pointer.tail.y += 0.1
+                    Angle_Pointer.tail.y += self.Advanced_MCH_Angle_Pointer_Length
 
                 Angle_Pointer.parent = Lower
 
