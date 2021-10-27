@@ -48,9 +48,10 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
         row.prop(self, "MCH_Bone_Layer", text="MCH Bone Layer")
         row.prop(self, "Pole_Bone_Layer", text="Pole Bone Layer")
 
-        layout.prop(self, "Show_Extras", text="MCH Options")
-        if self.Show_Extras:
-            if self.IK_Finder_Method == "ADVANCED":
+        if self.IK_Finder_Method == "ADVANCED":
+            layout.prop(self, "Show_Extras", text="MCH Options")
+            if self.Show_Extras:
+
                 layout.prop(self, "Advanced_MCH_Size", text="MCH Size (Advanced)")
                 layout.prop(self, "Advanced_MCH_Angle_Pointer_Length", text="Angle Pointer Size (Advanced)")
 
