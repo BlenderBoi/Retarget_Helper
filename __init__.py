@@ -9,12 +9,15 @@ bl_info = {
     "category": "Utility",
 }
 
+#Generate_IK_Poll_Finder: Set Bone to Non Deform
+
 import bpy
 from . import Preferences
 from . import Retarget_Helper_Panel
 from . import Extract_And_Constraint
 from . import Generate_IK_Poll_Finder
 from . import ActorCore_Cleanup
+
 modules = [ActorCore_Cleanup, Generate_IK_Poll_Finder, Retarget_Helper_Panel, Extract_And_Constraint, Preferences]
 
 def register():
