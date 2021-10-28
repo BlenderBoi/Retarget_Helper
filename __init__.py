@@ -2,7 +2,7 @@
 bl_info = {
     "name": "Retarget Helper",
     "author": "BlenderBoi",
-    "version": (1, 0),
+    "version": (1, 1),
     "blender": (2, 80, 0),
     "description": "A Utiity tool that provides simple complementary tools to work with other retargeting addon to help on retargeting process base on CGDive's Workflow",
     "wiki_url": "",

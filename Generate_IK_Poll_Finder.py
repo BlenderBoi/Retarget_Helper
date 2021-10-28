@@ -98,9 +98,11 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
 
                 Upper_Angle_Finder.head = Upper.tail
                 Upper_Angle_Finder.tail = Upper.head
+                Upper_Angle_Finder.use_deform = False
 
                 Lower_Angle_Finder.head = Lower.head
                 Lower_Angle_Finder.tail = Lower.tail
+                Lower_Angle_Finder.use_deform = False
 
                 Upper_Angle_Finder.length = self.Advanced_MCH_Size
                 Lower_Angle_Finder.length = self.Advanced_MCH_Size
@@ -114,6 +116,7 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
                 Angle_Pointer_Name = "MCH" + Lower.name + "Angle_Pointer"
                 Angle_Pointer = bones.new(Angle_Pointer_Name)
 
+                Angle_Pointer.use_deform = False
                 Angle_Pointer.head = Utility_Function.midpoint([Upper_Angle_Finder.tail, Lower_Angle_Finder.tail], "CENTER")
                 Angle_Pointer.tail = Lower.head
 
@@ -128,6 +131,8 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
                 Pole_Finder.align_orientation(Angle_Pointer)
                 Pole_Finder.length = self.Distance
 
+                Pole_Finder.use_deform = False
+
                 Pole_Finder.parent = Lower
 
 
@@ -135,6 +140,8 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
                 Pole_Bone.head = Pole_Finder.tail
                 Pole_Bone.tail = Pole_Bone.head
                 Pole_Bone.tail.z += self.Pole_Size
+
+                Pole_Bone.use_deform = False
 
                 if self.Pole_Copy_Rotation:
                     Pole_Bone.align_orientation(Angle_Pointer)
@@ -214,6 +221,7 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
                     layers[self.MCH_Bone_Layer] = True
                     bone.bone.layers = layers
 
+
             if self.IK_Finder_Method == "SIMPLE":
 
                 Upper_Angle_Finder_Name = "MCH" + Upper.name + "Angle_Finder"
@@ -222,9 +230,13 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
                 Upper_Angle_Finder = bones.new(Upper_Angle_Finder_Name)
                 Lower_Angle_Finder = bones.new(Lower_Angle_Finder_Name)
 
+                Upper_Angle_Finder.use_deform = False
+
                 Upper_Angle_Finder.head = Upper.tail
                 Upper_Angle_Finder.tail = Upper.head
                 Upper_Angle_Finder.roll = Upper.roll
+
+                Lower_Angle_Finder.use_deform = False
 
                 Lower_Angle_Finder.head = Lower.head
                 Lower_Angle_Finder.tail = Lower.tail
@@ -238,6 +250,8 @@ class RetargetHelper_OT_Generate_IK_Poll_Finder(bpy.types.Operator):
 
                 Pole_Bone_Name = self.Pole_Bone_Name
                 Pole_Bone = bones.new(Pole_Bone_Name)
+
+                Pole_Bone.use_deform = False
 
                 Pole_Bone.head = Utility_Function.midpoint([Upper_Angle_Finder.tail, Lower_Angle_Finder.tail], "CENTER")
                 Pole_Bone.tail = Pole_Bone.head
