@@ -14,6 +14,7 @@ class RETARGET_HELPER_PT_Side_Panel(bpy.types.Panel):
         layout.operator("retarget_helper.generate_ik_poll_finder", text="Generate IK Poll Finder")
         layout.operator("retarget_helper.actorcore_cleanup", text="Actorcore Cleanup")
         layout.operator("retarget_helper.unbind_mesh", text="Clean Unbind Mesh")
+        layout.operator("retarget_helper.mixamo_cleanup", text="Mixamo Cleanup")
 
 
 

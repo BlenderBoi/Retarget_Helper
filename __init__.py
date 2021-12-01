@@ -2,7 +2,7 @@
 bl_info = {
     "name": "Retarget Helper",
     "author": "BlenderBoi",
-    "version": (1, 1),
+    "version": (1, 2, 0),
     "blender": (2, 80, 0),
     "description": "A Utiity tool that provides simple complementary tools to work with other retargeting addon to help on retargeting process base on CGDive's Workflow",
     "wiki_url": "",
@@ -18,8 +18,10 @@ from . import Extract_And_Constraint
 from . import Generate_IK_Poll_Finder
 from . import ActorCore_Cleanup
 from . import Unbind
+from . import Mixamo_Cleanup
 
-modules = [Unbind, ActorCore_Cleanup, Generate_IK_Poll_Finder, Retarget_Helper_Panel, Extract_And_Constraint, Preferences]
+
+modules = [Mixamo_Cleanup, Unbind, ActorCore_Cleanup, Generate_IK_Poll_Finder, Retarget_Helper_Panel, Extract_And_Constraint, Preferences]
 
 def register():
     for module in modules:
