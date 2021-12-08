@@ -34,7 +34,7 @@ class Side_Flipper:
 
         return flipped_bone
 
-    def symmetrize_bone(self, bones, bone, relation=True, create_missing=True):
+    def symmetrize_edit_bone(self, bones, bone, relation=True, create_missing=True, axis="X", flip_roll=False):
 
         if bones:
             if bone:
@@ -51,9 +51,20 @@ class Side_Flipper:
                         flipped_bone.tail = bone.tail
                         flipped_bone.roll = bone.roll
 
-                        flipped_bone.head.x = -bone.head.x
-                        flipped_bone.tail.x = -bone.tail.x
-                        flipped_bone.roll = -bone.roll
+                        if axis == "X":
+                            flipped_bone.head.x = -bone.head.x
+                            flipped_bone.tail.x = -bone.tail.x
+                        if axis == "Y":
+                            flipped_bone.head.y = -bone.head.y
+                            flipped_bone.tail.y = -bone.tail.y
+                        if axis == "Z":
+                            flipped_bone.head.z = -bone.head.z
+                            flipped_bone.tail.z = -bone.tail.z
+
+
+                        flipped_bone.roll = bone.roll
+                        if flip_roll:
+                            flipped_bone.roll = -bone.roll
 
                         if relation:
 
@@ -79,7 +90,34 @@ class Side_Flipper:
                                     if flipped_child:
                                         flipped_child.parent = flipped_bone
 
+    # def symmetrize_pose_bone(self, bones, bone, relation=True, create_missing=True, axis="X", flip_roll=False):
+    #
+    #     if bones:
+    #         if bone:
+    #             flipped_bone_name = self.flip_name(bone.name)
+    #             if flipped_bone_name:
+    #                 flipped_bone = bones.get(flipped_bone_name)
+    #
+    #                 if flipped_bone:
+    #                     flipped_bone.head = bone.head
+    #                     flipped_bone.tail = bone.tail
+    #                     flipped_bone.roll = bone.roll
+    #
+    #                     if axis == "X":
+    #                         flipped_bone.head.x = -bone.head.x
+    #                         flipped_bone.tail.x = -bone.tail.x
+    #                     if axis == "Y":
+    #                         flipped_bone.head.y = -bone.head.y
+    #                         flipped_bone.tail.y = -bone.tail.y
+    #                     if axis == "Z":
+    #                         flipped_bone.head.z = -bone.head.z
+    #                         flipped_bone.tail.z = -bone.tail.z
+    #
+    #
+    #
 
+
+ENUM_Axis = [("X","X","X"),("Y","Y","Y"),("Z","Z","Z")]
 
 class RetargetHelper_OT_Symmetrize_Selected_Bones(bpy.types.Operator):
     """Symmetrize Selected Bone"""
@@ -89,6 +127,8 @@ class RetargetHelper_OT_Symmetrize_Selected_Bones(bpy.types.Operator):
 
     left: bpy.props.StringProperty(default=".L")
     right: bpy.props.StringProperty(default=".R")
+    axis: bpy.props.EnumProperty(items=ENUM_Axis)
+    flip_roll: bpy.props.BoolProperty(default=False)
 
     def invoke(self, context, event):
 
@@ -102,8 +142,10 @@ class RetargetHelper_OT_Symmetrize_Selected_Bones(bpy.types.Operator):
 
     def draw(self, context):
         layout = self.layout
+        layout.prop(self, "axis", text="Flip Axis")
         layout.prop(self, "left", text="Left Identifier")
         layout.prop(self, "right", text="Right Identifier")
+        layout.prop(self, "flip_roll", text="Flip Roll")
 
     def execute(self, context):
 
@@ -116,8 +158,8 @@ class RetargetHelper_OT_Symmetrize_Selected_Bones(bpy.types.Operator):
 
         if object:
             for bone in context.selected_bones:
-                print(bone)
-                flipped_bone = Flipper.symmetrize_bone(bones, bone)
+
+                flipped_bone = Flipper.symmetrize_edit_bone(bones, bone, axis=self.axis, flip_roll=self.flip_roll)
 
 
         return {'FINISHED'}
