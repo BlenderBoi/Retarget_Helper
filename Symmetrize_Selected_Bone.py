@@ -34,7 +34,7 @@ class Side_Flipper:
 
         return flipped_bone
 
-    def symmetrize_edit_bone(self, bones, bone, relation=True, create_missing=True, axis="X", flip_roll=False):
+    def symmetrize_edit_bone(self, bones, bone, relation=True, create_missing=False, axis="X", flip_roll=False):
 
         if bones:
             if bone:
@@ -51,6 +51,9 @@ class Side_Flipper:
                         flipped_bone.tail = bone.tail
                         flipped_bone.roll = bone.roll
 
+
+                        # flipped_bone.align_orientation(bone)
+
                         if axis == "X":
                             flipped_bone.head.x = -bone.head.x
                             flipped_bone.tail.x = -bone.tail.x
@@ -66,30 +69,32 @@ class Side_Flipper:
                         if flip_roll:
                             # flipped_bone.roll = -bone.roll
                             flipped_bone.roll = bone.roll + math.radians(180)
-
-                        if relation:
-
-                            parent = bone.parent
-                            flipped_parent_name = self.flip_name(parent.name)
-
-                            if flipped_parent_name:
-                                flipped_parent = bones.get(flipped_parent_name)
-
-                                if flipped_parent:
-                                    flipped_bone.parent = flipped_parent
-
-                                    flipped_bone.use_connect = bone.use_connect
-
-                                    flipped_parent.use_connect = bone.parent.use_connect
+                        #
 
 
-                            for child in bone.children:
-                                flipped_child_name = self.flip_name(child.name)
-
-                                if flipped_child_name:
-                                    flipped_child = bones.get(flipped_child_name)
-                                    if flipped_child:
-                                        flipped_child.parent = flipped_bone
+                        # if relation:
+                        #
+                        #     parent = bone.parent
+                        #     flipped_parent_name = self.flip_name(parent.name)
+                        #
+                        #     if flipped_parent_name:
+                        #         flipped_parent = bones.get(flipped_parent_name)
+                        #
+                        #         if flipped_parent:
+                        #             flipped_bone.parent = flipped_parent
+                        #
+                        #             flipped_bone.use_connect = bone.use_connect
+                        #
+                        #             flipped_parent.use_connect = bone.parent.use_connect
+                        #
+                        #
+                        #     for child in bone.children:
+                        #         flipped_child_name = self.flip_name(child.name)
+                        #
+                        #         if flipped_child_name:
+                        #             flipped_child = bones.get(flipped_child_name)
+                        #             if flipped_child:
+                        #                 flipped_child.parent = flipped_bone
 
     # def symmetrize_pose_bone(self, bones, bone, relation=True, create_missing=True, axis="X", flip_roll=False):
     #
