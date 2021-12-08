@@ -57,6 +57,9 @@ class Side_Flipper:
                         if axis == "X":
                             flipped_bone.head.x = -bone.head.x
                             flipped_bone.tail.x = -bone.tail.x
+                            flipped_bone.head.z = -bone.head.z
+                            flipped_bone.tail.z = -bone.tail.z
+
                         if axis == "Y":
                             flipped_bone.head.y = -bone.head.y
                             flipped_bone.tail.y = -bone.tail.y
