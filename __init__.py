@@ -19,9 +19,9 @@ from . import Generate_IK_Poll_Finder
 from . import ActorCore_Cleanup
 from . import Unbind
 from . import Mixamo_Cleanup
+from . import Symmetrize_Selected_Bone
 
-
-modules = [Mixamo_Cleanup, Unbind, ActorCore_Cleanup, Generate_IK_Poll_Finder, Retarget_Helper_Panel, Extract_And_Constraint, Preferences]
+modules = [Symmetrize_Selected_Bone, Mixamo_Cleanup, Unbind, ActorCore_Cleanup, Generate_IK_Poll_Finder, Retarget_Helper_Panel, Extract_And_Constraint, Preferences]
 
 def register():
     for module in modules:
