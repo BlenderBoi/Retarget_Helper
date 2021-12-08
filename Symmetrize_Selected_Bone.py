@@ -1,7 +1,7 @@
 import bpy
 import re
 from . import Utility_Function
-
+import math
 
 
 
@@ -64,7 +64,8 @@ class Side_Flipper:
 
                         flipped_bone.roll = bone.roll
                         if flip_roll:
-                            flipped_bone.roll = -bone.roll
+                            # flipped_bone.roll = -bone.roll
+                            flipped_bone.roll = bone.roll + math.radians(180)
 
                         if relation:
 
@@ -103,18 +104,18 @@ class Side_Flipper:
     #                     flipped_bone.tail = bone.tail
     #                     flipped_bone.roll = bone.roll
     #
+    #                     flipped_bone.rotation_quaternion = bone.rotation_quaternion
+    #                     flipped_bone.scale = bone.scale
+    #                     flipped_bone.location = bone.location
+    #
     #                     if axis == "X":
-    #                         flipped_bone.head.x = -bone.head.x
-    #                         flipped_bone.tail.x = -bone.tail.x
-    #                     if axis == "Y":
-    #                         flipped_bone.head.y = -bone.head.y
-    #                         flipped_bone.tail.y = -bone.tail.y
-    #                     if axis == "Z":
-    #                         flipped_bone.head.z = -bone.head.z
-    #                         flipped_bone.tail.z = -bone.tail.z
-    #
-    #
-    #
+    #                         flipped_bone.location.x = -bone.location.x
+    #                         flipped_bone.rotation_quaternion.y = -bone.rotation_quaternion.y
+    #                         flipped_bone.rotation_quaternion.z = -bone.rotation_quaternion.z
+
+
+
+
 
 
 ENUM_Axis = [("X","X","X"),("Y","Y","Y"),("Z","Z","Z")]
