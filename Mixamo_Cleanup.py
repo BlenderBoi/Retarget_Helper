@@ -293,6 +293,10 @@ class RetargetHelper_OT_Mixamo_Cleanup(bpy.types.Operator):
 
 
 
+        bpy.ops.object.mode_set(mode='EDIT')
+        
+        bpy.ops.object.mode_set(mode='OBJECT')
+        
         return {'FINISHED'}
 
 
