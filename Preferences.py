@@ -36,6 +36,7 @@ class Retarget_Helper_user_preferences(bpy.types.AddonPreferences):
     bl_idname = addon_name
 
     Retarget_Helper_Panel_Name: bpy.props.StringProperty(default="Retarget Helper", update=update_panel)
+    use_selected: bpy.props.BoolProperty(default=True)
 
     def draw(self, context):
 

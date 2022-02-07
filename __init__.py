@@ -20,8 +20,9 @@ from . import ActorCore_Cleanup
 from . import Unbind
 from . import Mixamo_Cleanup
 from . import Symmetrize_Selected_Bone
+from . import Constraint_Toogle
 
-modules = [Symmetrize_Selected_Bone, Mixamo_Cleanup, Unbind, ActorCore_Cleanup, Generate_IK_Poll_Finder, Retarget_Helper_Panel, Extract_And_Constraint, Preferences]
+modules = [Constraint_Toogle, Symmetrize_Selected_Bone, Mixamo_Cleanup, Unbind, ActorCore_Cleanup, Generate_IK_Poll_Finder, Retarget_Helper_Panel, Extract_And_Constraint, Preferences]
 
 def register():
     for module in modules:
