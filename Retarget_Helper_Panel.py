@@ -39,6 +39,8 @@ class RETARGET_HELPER_PT_Side_Panel(bpy.types.Panel):
         layout.operator("retarget_helper.unbind_mesh", text="Clean Unbind Mesh")
         layout.operator("retarget_helper.mixamo_cleanup", text="Mixamo Cleanup")
         layout.operator("retarget_helper.symmetrize_selected_bones", text="Symmetrize Selected Bones")
+        layout.operator("retargethelper.constraint_to_armature_name", text="Constraint To Armature")
+
 
 
 
